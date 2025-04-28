@@ -1,0 +1,23 @@
+{
+  "name": "epytodo",
+  "version": "1.0.0",
+  "main": "./src/sql/index.js",
+  "scripts": {
+    "test": "node ./src/sql/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/EpitechPGEPromo2029/B-WEB-200-LIL-2-1-epytodo-lucas.lhomme.git"
+  },
+  "author": "Crabe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EpitechPGEPromo2029/B-WEB-200-LIL-2-1-epytodo-lucas.lhomme/issues"
+  },
+  "homepage": "https://github.com/EpitechPGEPromo2029/B-WEB-200-LIL-2-1-epytodo-lucas.lhomme#readme",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  }
+}
