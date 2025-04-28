@@ -1,7 +1,24 @@
 const express = require('express')
 const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
 dotenv.config();
+
+const db = require('../sql/sql.js');
 const app = express()
+
+app.use(bodyParser.json());
+
+// Exemple de route GET
+app.get('/api/users', (req, res) => {
+    db.query('SELECT * FROM users', (err, results) => {
+      if (err) {
+        console.error('Erreur lors de la récupération des utilisateurs :', err);
+        res.status(500).send('Erreur serveur');
+        return;
+      }
+      res.json(results);
+    });
+  });
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -39,5 +56,5 @@ app.get("/date", function (req, res) {
 });
 
 app.listen(`${process.env.port}`, () => {
-  console.log(`Example app listening on port ${process.env. port}`)
+  console.log(`Example app listening on port ${process.env.port}`)
 })
