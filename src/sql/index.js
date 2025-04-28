@@ -16,22 +16,24 @@ app.get("/date", function (req, res) {
     const date = new Date()
     const year = date.getFullYear()
     const day = date.getUTCDate()
-    const month = date.getUTCMonth() + 1 // Months are 0-indexed, so add 1
-    console.log(`day: ${day}\nmonth: ${month}\nyear: ${year}`);
+    const month = date.getUTCMonth() + 1
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    console.log(`day: ${day}\nmonth: ${month}\nyear: ${year}\nhours: ${hours}\nminutes: ${minutes}`);
     
     res.format({
         'text/html': () => {
-            res.send(`<h1>Date</h1> <p>${day}-${month}-${year}</p>`)
+            res.send(`<h1>Date</h1> <p>${day}-${month}-${year} ${hours}:${minutes}</p>`)
         },
         'application/json': () => {
-            res.json({ day, month, year })
+            res.json({ day, month, year, hours, minutes })
         },
         'text/plain': () => {
-            res.send(`Date: ${day}-${month}-${year}`)
+            res.send(`Date: ${day}-${month}-${year} ${hours}:${minutes}`)
         },
         default: () => {
             // default to html
-            res.send(`<h1>Date</h1> <p>${day}-${month}-${year}</p>`)
+            res.send(`<h1>Date</h1> <p>${day}-${month}-${year} ${hours}:${minutes}</p>`)
         }
     })
 });
