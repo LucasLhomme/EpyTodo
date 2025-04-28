@@ -20,15 +20,16 @@ app.get('/api/users', (req, res) => {
     });
   });
 
+  //main page
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
-
+// show username
 app.get('/name/:userId', (req, res) => {
     const userId = req.params.userId;
     res.send(`<h1>User Profile</h1><p>User ID: ${userId}</p>`);
 });
-
+//show th date
 app.get("/date", function (req, res) {
     const date = new Date()
     const year = date.getFullYear()
