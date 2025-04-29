@@ -9,7 +9,7 @@
     SQL_USER=root
     SQL_PWD=password
     SQL_DB=epytodo
-    SECRET=your_jwt_secret_key
+    JWT_SECRET=your_jwt_secret_key
     ```
 
 2. Create the `epytodo` database in MySQL
@@ -22,4 +22,6 @@ Run the following commands to install dependencies:
 npm install express --save
 npm install dotenv --save
 npm install mysql2
+npm install jsonwebtoken
+npm install bcryptjs
 ```
