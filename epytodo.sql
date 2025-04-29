@@ -2,16 +2,18 @@ CREATE DATABASE IF NOT EXISTS epytodo;
 
 USE epytodo;
 
---Table for User
+-- Table for User
 CREATE TABLE IF NOT EXISTS user (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    firstname VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
---Table for the todo
+-- Table for the todo
 CREATE TABLE IF NOT EXISTS todo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,

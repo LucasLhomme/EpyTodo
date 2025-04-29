@@ -2,11 +2,14 @@ const express = require('express')
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 dotenv.config();
-
+const authRoutes = require('../routes/auth.js');
 const db = require('../sql/sql.js');
 const app = express()
 
+app.use(express.json());
 app.use(bodyParser.json());
+app.use('/', authRoutes);
+
 
 // Exemple de route GET
 app.get('/api/users', (req, res) => {
