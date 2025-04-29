@@ -13,6 +13,7 @@
     ```
 
 2. Create the `epytodo` database in MySQL
+    `cat epytodo.sql | mysql -u root -p`
 
 ## Installation
 
