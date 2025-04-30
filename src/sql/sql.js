@@ -1,8 +1,9 @@
 // sql.js
 const mysql = require('mysql2');
 require('dotenv').config();
+const PORT = process.env.PORT;
 
-//don't forget to setup the .env for working
+
 const connection = mysql.createConnection({
   host: `${process.env.SQL_HOST}`,
   user: `${process.env.SQL_USER}`,
@@ -15,7 +16,7 @@ connection.connect((err) => {
     console.error('Erreur de connexion à la base de données :', err);
     return;
   }
-  console.log(`Connecté à la base de données MySQL. (ports: ${process.env.port})`);
+  console.log(`Connecté à la base de données MySQL. (ports: ${process.env.PORT})`);
 });
 
 module.exports = connection;
