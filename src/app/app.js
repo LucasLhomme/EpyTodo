@@ -4,12 +4,14 @@ const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 dotenv.config();
 const authRoutes = require('../routes/auth.js');
+const todosRoutes = require('../routes/todos/todos.js');
 const db = require('../sql/sql.js');
 const app = express()
 
 app.use(express.json());
 app.use(bodyParser.json());
 app.use('/', authRoutes);
+app.use('/todos', todosRoutes);
 
 
   //main page
@@ -60,4 +62,4 @@ app.use('/', authRoutes);
   });
 
   module.exports = app;
-  
+
