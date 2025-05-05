@@ -5,11 +5,11 @@
 1. Create a `.env` file in the project root with the following content:
     ```
     PORT=3000
-    SQL_HOST=localhost
-    SQL_USER=root
-    SQL_PWD=password
-    SQL_DB=epytodo
-    JWT_SECRET=your_jwt_secret_key
+    MYSQL_HOST=localhost
+    MYSQL_USER=root
+    MYSQL_ROOT_PASSWORD=password
+    MYSQL_DATABASE=epytodo
+    SECRET=your_SECRET_key
     ```
 
 2. Create the `epytodo` database in MySQL

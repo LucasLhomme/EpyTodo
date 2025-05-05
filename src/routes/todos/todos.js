@@ -2,36 +2,13 @@
 const express = require('express');  // Framework web pour créer l'API
 const router = express.Router();     // Création d'un routeur Express pour organiser les routes
 const db = require('../../sql/sql'); // Connexion à la base de données MySQL
-const jwt = require('jsonwebtoken'); // Pour vérifier les tokens d'authentification
-require('dotenv').config();          // Pour charger les variables d'environnement (.env)
-
-// Middleware d'authentification - vérifie si l'utilisateur est connecté via son token JWT
-// Ce middleware sera réutilisé sur toutes les routes qui nécessitent une authentification
-const auth = (req, res, next) => {
-    // Extraction du token JWT de l'en-tête Authorization (format: "Bearer <token>")
-    const token = req.headers.authorization?.split(' ')[1];
-    // Si aucun token n'est fourni, on renvoie une erreur 401 (non autorisé)
-    if (!token) {
-        return res.status(401).json({ msg: "No token, authorization denied" });
-    }
-    try {
-        // Décodage et vérification du token avec la clé secrète stockée dans les variables d'environnement
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Stockage des informations de l'utilisateur dans l'objet request pour utilisation ultérieure
-        req.user = decoded;
-        // Passage au middleware/route suivant
-        next();
-    } catch (err) {
-        // Si le token est invalide ou expiré, on renvoie une erreur 401
-        res.status(401).json({ msg: "Token is not valid" });
-    }
-};
+const auth = require('../../middleware/auth'); // Middleware d'authentification
 
 // Route GET pour récupérer toutes les tâches de l'utilisateur connecté
 // Le middleware auth garantit que seules les personnes authentifiées peuvent accéder à cette route
 router.get('/', auth, (req, res) => {
     // Requête SQL qui sélectionne uniquement les tâches appartenant à l'utilisateur connecté
-    db.query('SELECT * FROM todo WHERE user_id = ?', [req.user.id], (err, results) => {
+    db.query('SELECT * FROM todo WHERE user_id = ?', [req.auth.userId], (err, results) => {
         // Gestion des erreurs de base de données
         if (err)
             return res.status(500).json({ msg: "DB Error" });
@@ -44,7 +21,7 @@ router.get('/', auth, (req, res) => {
 router.get('/:id', auth, (req, res) => {
     // Requête SQL qui vérifie que la tâche existe ET appartient bien à l'utilisateur connecté (sécurité)
     db.query('SELECT * FROM todo WHERE id = ? AND user_id = ?', 
-        [req.params.id, req.user.id],
+        [req.params.id, req.auth.userId],
         (err, results) => {
             // Gestion des erreurs de base de données
             if (err)
@@ -69,7 +46,7 @@ router.post('/', auth, (req, res) => {
     const completedValue = completed ? 1 : 0;
     // Insertion de la nouvelle tâche dans la base de données
     db.query('INSERT INTO todo (user_id, title, description, completed) VALUES (?, ?, ?, ?)',
-        [req.user.id, title, description || "", completedValue],
+        [req.auth.userId, title, description || "", completedValue],
         (err, result) => {
             // Gestion des erreurs d'insertion
             if (err)
@@ -91,7 +68,7 @@ router.put('/:id', auth, (req, res) => {
     const { title, description, completed } = req.body;
     // Vérification que la tâche existe et appartient à l'utilisateur connecté
     db.query('SELECT * FROM todo WHERE id = ? AND user_id = ?', 
-        [req.params.id, req.user.id],
+        [req.params.id, req.auth.userId],
         (err, results) => {
             // Gestion des erreurs de base de données
             if (err)
@@ -124,7 +101,7 @@ router.put('/:id', auth, (req, res) => {
             
             // Ajout de l'ID et user_id pour la clause WHERE
             values.push(req.params.id);
-            values.push(req.user.id);
+            values.push(req.auth.userId);
             
             // Exécution de la requête de mise à jour avec les champs variables
             db.query(`UPDATE todo SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`,
@@ -151,7 +128,7 @@ router.put('/:id', auth, (req, res) => {
 router.delete('/:id', auth, (req, res) => {
     // Vérification que la tâche existe et appartient à l'utilisateur connecté
     db.query('SELECT * FROM todo WHERE id = ? AND user_id = ?', 
-        [req.params.id, req.user.id],
+        [req.params.id, req.auth.userId],
         (err, results) => {
             // Gestion des erreurs de base de données
             if (err)
@@ -162,7 +139,7 @@ router.delete('/:id', auth, (req, res) => {
             
             // Suppression de la tâche après vérification
             db.query('DELETE FROM todo WHERE id = ? AND user_id = ?',
-                [req.params.id, req.user.id],
+                [req.params.id, req.auth.userId],
                 (err, _result) => {
                     // Gestion des erreurs de suppression
                     if (err)
