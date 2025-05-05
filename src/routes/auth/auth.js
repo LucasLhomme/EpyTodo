@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../../src/sql/sql'); // connexion à la BDD
+const db = require('../../sql/sql'); // connexion à la BDD
 require('dotenv').config(); // pour gérer le token secret
 
 router.post('/register', async(req, res) => {

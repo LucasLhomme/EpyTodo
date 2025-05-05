@@ -3,7 +3,7 @@ const express = require('express')
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 dotenv.config();
-const authRoutes = require('../../routes/auth/auth.js');
+const authRoutes = require('../routes/auth/auth.js');
 const todosRoutes = require('../routes/todos/todos.js');
 const db = require('../sql/sql.js');
 const app = express()

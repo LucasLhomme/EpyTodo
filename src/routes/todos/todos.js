@@ -38,15 +38,15 @@ router.get('/:id', auth, (req, res) => {
 // Route POST pour créer une nouvelle tâche
 router.post('/', auth, (req, res) => {
     // Extraction des données du corps de la requête (JSON)
-    const { title, description, completed } = req.body;
+    const { title, description, completed, status } = req.body;
     // Vérification que le titre est présent (champ obligatoire)
-    if (!title)
+    if (!title || !description || !due_time || !status)
         return res.status(400).json({ msg: "Missing fields" });
     // Conversion de la valeur completed en 0/1 pour la base de données
     const completedValue = completed ? 1 : 0;
     // Insertion de la nouvelle tâche dans la base de données
-    db.query('INSERT INTO todo (user_id, title, description, completed) VALUES (?, ?, ?, ?)',
-        [req.auth.userId, title, description || "", completedValue],
+    db.query('INSERT INTO todo (user_id, title, description, due_time, status) VALUES (?, ?, ?, ?, ?)',
+        [req.auth.userId, title, description, due_time, todoStatus],
         (err, result) => {
             // Gestion des erreurs d'insertion
             if (err)
@@ -90,9 +90,13 @@ router.put('/:id', auth, (req, res) => {
                 updates.push('description = ?');
                 values.push(description);
             }
-            if (completed !== undefined) {
-                updates.push('completed = ?');
-                values.push(completed ? 1 : 0);
+            if (status) {
+                updates.push('status = ?');
+                values.push(status);
+            }
+            if (due_time) {
+                updates.push('due_time = ?');
+                values.push(due_time);
             }
             
             // Si aucun champ à mettre à jour n'a été fourni
