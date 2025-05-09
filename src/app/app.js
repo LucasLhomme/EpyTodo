@@ -7,13 +7,19 @@ const authRoutes = require('../routes/auth/auth.js');
 const todosRoutes = require('../routes/todos/todos.js');
 const db = require('../sql/sql.js');
 const app = express()
+const userRoutes = require('../routes/user/user.js');
+
+// Ces deux lignes sont suffisantes pour gérer toutes vos routes utilisateurs
+app.use('/user', userRoutes);
+app.use('/users', userRoutes);
 
 app.use(express.json());
 app.use(bodyParser.json());
 app.use('/', authRoutes);
 app.use('/todos', todosRoutes);
 
-
+//html page to debug from the bootstrap
+//------------------------------------------------------------------------------------------------------------------------
   //main page
   app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -23,7 +29,7 @@ app.use('/todos', todosRoutes);
       const userId = req.params.userId;
       res.send(`<h1>User Profile</h1><p>User ID: ${userId}</p>`);
   });
-  
+
   //show the date
   app.get("/date", function (req, res) {
       const date = new Date()
@@ -50,8 +56,11 @@ app.use('/todos', todosRoutes);
           }
       })
   });
+//--------------------------------------------------------------------------------------------------
 
-  app.get('/api/users', (req, res) => {
+// Supprimez ou commentez la route app.get('/users', ...) définie plus bas
+/*
+  app.get('/users', (req, res) => {
     db.query('SELECT * FROM user', (err, results) => {
       if (err) {
         console.error('Erreur lors de la récupération des utilisateurs :', err);
@@ -61,6 +70,7 @@ app.use('/todos', todosRoutes);
       res.json(results);
     });
   });
+*/
 
   module.exports = app;
 

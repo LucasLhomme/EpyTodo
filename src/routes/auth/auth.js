@@ -33,7 +33,7 @@ router.post('/login', (req, res) => {
     const {email, password} = req.body
     db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
         //si l'email n'existe pas return 500
-        if (err) return res.status(500).json({ msg: "DB Error" });
+        if (err) return res.status(500).json({ msg: "Internal server error" });
         if (results.length === 0) return res.status(401).json({ msg: "Invalid credentials" });
     const user = results[0];
     //crypte le mot de passe
