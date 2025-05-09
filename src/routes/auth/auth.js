@@ -21,7 +21,7 @@ router.post('/register', async(req, res) => {
     db.query('INSERT INTO user (email, password, firstname, name, username) VALUES (?, ?, ?, ?, ?)',
         [email, hashedPassword, firstname, name, username],
         (err, _result) => {
-            if (err) return res.status(500).json({ msg: "DB Error", err });
+            if (err) return res.status(500).json({ "msg": "Account already exists"});
             res.status(201).json({ msg: "User registered" });
         }
     );

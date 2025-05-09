@@ -23,6 +23,7 @@ app.use('/todos', todosRoutes);
       const userId = req.params.userId;
       res.send(`<h1>User Profile</h1><p>User ID: ${userId}</p>`);
   });
+  
   //show the date
   app.get("/date", function (req, res) {
       const date = new Date()

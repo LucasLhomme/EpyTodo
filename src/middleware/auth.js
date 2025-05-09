@@ -9,7 +9,9 @@ module.exports = (req, res, next) => {
            userId: userId
        };
        next();
+       if (token != decodedToken)
+        res.status(401).json({msg: " Token is not valid "})
    } catch(error) {
-       res.status(401).json({ msg: "Authorization denied" });  // Message d'erreur plus générique
+       res.status(401).json({ msg: "No token, authorization denied" });  // Message d'erreur plus générique
    }
 };

@@ -16,7 +16,7 @@ connection.connect((err) => {
     console.error('Erreur de connexion à la base de données :', err);
     return;
   }
-  console.log(`Connecté à la base de données MySQL. (ports: ${PORT})`);
+  console.log(`Connecté à la base de données MySQL. (ports: ${process.env.PORT})`);
 });
 
 module.exports = connection;
