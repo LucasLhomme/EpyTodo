@@ -92,7 +92,7 @@ router.put('/:id', auth, (req, res) => {
                 updates.push('due_time = ?');
                 values.push(due_time);
             }
-            
+
             // Si aucun champ à mettre à jour n'a été fourni
             if (updates.length === 0)
                 return res.status(400).json({ msg: "Nothing to update" });
@@ -143,7 +143,7 @@ router.delete('/:id', auth, (req, res) => {
                     if (err)
                         return res.status(500).json({ msg: "Internal server error" });
                     // Confirmation de la suppression avec l'ID de la tâche supprimée
-                    res.json({ msg: "Successfully deleted record number: " + req.params.id });
+                    res.json({ msg: `Successfully deleted record number : ${req.params.id}` });
                 }
             );
         }
