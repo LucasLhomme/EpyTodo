@@ -15,6 +15,10 @@
 2. Create the `epytodo` database in MySQL
     `cat epytodo.sql | mysql -u root -p`
 
+3. Install dependencies and start the server:
+    `npm install`
+    `npm start`
+
 ## Installation
 
 Run the following commands to install dependencies:
