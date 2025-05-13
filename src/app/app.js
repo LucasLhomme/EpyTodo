@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 dotenv.config();
 const authRoutes = require('../routes/auth/auth.js');
 const todosRoutes = require('../routes/todos/todos.js');
-const db = require('../sql/sql.js');
+const db = require('../config/db.js');
 const app = express()
 const userRoutes = require('../routes/user/user.js');
 app.use(express.json());
@@ -53,20 +53,6 @@ app.use('/todos', todosRoutes);
       })
   });
 //--------------------------------------------------------------------------------------------------
-
-// Supprimez ou commentez la route app.get('/users', ...) définie plus bas
-/*
-  app.get('/users', (req, res) => {
-    db.query('SELECT * FROM user', (err, results) => {
-      if (err) {
-        console.error('Erreur lors de la récupération des utilisateurs :', err);
-        res.status(500).send('Erreur serveur');
-        return;
-      }
-      res.json(results);
-    });
-  });
-*/
 
   module.exports = app;
 
