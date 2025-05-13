@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const db = require('../../sql/sql');
+const db = require('../../config/db');
 const auth = require('../../middleware/auth');
 
 // GET /user - Voir tous les utilisateurs
@@ -23,11 +23,11 @@ router.get('/todos', auth, (req, res) => {
 // GET /users/:id ou /users/:email - Voir les informations d'un utilisateur par ID ou email
 router.get('/:identifier', auth, (req, res) => {
     const identifier = req.params.identifier;
-    let query = 'SELECT id, email, name, firstname, username FROM user WHERE id = ?';
+    let query = 'SELECT id, email, password, created_at, firstname, name FROM user WHERE id = ?';
     
     // Vérifier si l'identifiant est un email
     if (identifier.includes('@')) {
-        query = 'SELECT id, email, name, firstname, username FROM user WHERE email = ?';
+        query = 'SELECT id, email, password, created_at, firstname, name FROM user WHERE id = ?';
     }
     
     db.query(query, [identifier], (err, results) => {
@@ -51,32 +51,51 @@ router.put('/:id', auth, async (req, res) => {
         const updates = [];
         const values = [];
         
+        // Validation de l'email avec regex
         if (email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({ msg: "Bad parameter" });
+            }
             updates.push('email = ?');
             values.push(email);
         }
         
+        // Vérifier que le mot de passe n'est pas vide et a une longueur minimale
         if (password) {
+            if (password.trim() === '' || password.length < 6) {
+            return res.status(400).json({ msg: "Bad parameter" });
+            }
             try {
-                const hashedPassword = await bcrypt.hash(password, 10);
-                updates.push('password = ?');
-                values.push(hashedPassword);
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updates.push('password = ?');
+            values.push(hashedPassword);
             } catch (error) {
-                return res.status(500).json({ msg: "Internal server error" });
+            return res.status(500).json({ msg: "Internal server error" });
             }
         }
-        
+        // Vérifier que le nom n'est pas vide
         if (name) {
+            if (name.trim() === '') {
+                return res.status(400).json({ msg: "Bad parameter" });
+            }
             updates.push('name = ?');
             values.push(name);
         }
-        
+        // Vérifier que le prénom n'est pas vide
         if (firstname) {
+            if (firstname.trim() === '') {
+                return res.status(400).json({ msg: "Bad parameter" });
+            }
             updates.push('firstname = ?');
             values.push(firstname);
         }
         
         if (username) {
+            // Vérifier que le nom d'utilisateur a une longueur minimale
+            if (username.trim() === '' || username.length < 3) {
+                return res.status(400).json({ msg: "Bad parameter" });
+            }
             updates.push('username = ?');
             values.push(username);
         }
