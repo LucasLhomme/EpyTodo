@@ -8,22 +8,18 @@ const todosRoutes = require('../routes/todos/todos.js');
 const db = require('../sql/sql.js');
 const app = express()
 const userRoutes = require('../routes/user/user.js');
+app.use(express.json());
+app.use(bodyParser.json());
 
 // Ces deux lignes sont suffisantes pour gérer toutes vos routes utilisateurs
 app.use('/user', userRoutes);
 app.use('/users', userRoutes);
 
-app.use(express.json());
-app.use(bodyParser.json());
 app.use('/', authRoutes);
 app.use('/todos', todosRoutes);
 
 //html page to debug from the bootstrap
 //------------------------------------------------------------------------------------------------------------------------
-  //main page
-  app.get('/', (req, res) => {
-    res.send('Hello World!')
-  })
   // show username
   app.get('/name/:userId', (req, res) => {
       const userId = req.params.userId;
