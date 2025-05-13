@@ -2,20 +2,10 @@
 
 ## Setup Instructions
 
-1. Create a `.env` file in the project root with the following content:
-    ```
-    PORT=3000
-    MYSQL_HOST=localhost
-    MYSQL_USER=root
-    MYSQL_ROOT_PASSWORD=password
-    MYSQL_DATABASE=epytodo
-    SECRET=your_SECRET_key
-    ```
-
-2. Create the `epytodo` database in MySQL
+1. Create the `epytodo` database in MySQL
     `cat epytodo.sql | mysql -u root -p`
 
-3. Install dependencies and start the server:
+2. Install dependencies and start the server:
     `npm install`
     `npm start`
 
