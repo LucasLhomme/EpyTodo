@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const db = require('../../sql/sql');
 const auth = require('../../middleware/auth');
 
-// Route pour obtenir les infos de l'utilisateur connecté
+// GET /user - Voir tous les utilisateurs
 router.get('/', auth, (req, res) => {
-    db.query('SELECT * FROM user WHERE id = ?', [req.auth.userId], (err, results) => {
+    db.query('SELECT id, email, name, firstname, username FROM user', (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
-        if (results.length === 0) return res.status(404).json({ msg: "Not found" });
-        res.json(results[0]);
+        res.json(results);
     });
 });
 
-// Route pour voir les tâches de l'utilisateur connecté
+// GET /user/todos - Voir toutes les tâches d'un utilisateur connecté
 router.get('/todos', auth, (req, res) => {
     db.query('SELECT * FROM todo WHERE user_id = ?', [req.auth.userId], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
@@ -20,20 +20,107 @@ router.get('/todos', auth, (req, res) => {
     });
 });
 
-// Route pour obtenir les infos d'un utilisateur par ID ou email
-router.get('/:id', auth, (req, res) => {
-    // Déterminer si l'ID est un email ou un ID numérique
-    const param = req.params.id;
-    let query = 'SELECT * FROM user WHERE id = ?';
+// GET /users/:id ou /users/:email - Voir les informations d'un utilisateur par ID ou email
+router.get('/:identifier', auth, (req, res) => {
+    const identifier = req.params.identifier;
+    let query = 'SELECT id, email, name, firstname, username FROM user WHERE id = ?';
     
-    if (param.includes('@')) {
-        query = 'SELECT * FROM user WHERE email = ?';
+    // Vérifier si l'identifiant est un email
+    if (identifier.includes('@')) {
+        query = 'SELECT id, email, name, firstname, username FROM user WHERE email = ?';
     }
     
-    db.query(query, [param], (err, results) => {
+    db.query(query, [identifier], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
         if (results.length === 0) return res.status(404).json({ msg: "Not found" });
         res.json(results[0]);
+    });
+});
+
+// PUT /users/:id - Mettre à jour les informations d'un utilisateur
+router.put('/:id', auth, async (req, res) => {
+    const userId = req.params.id;
+    const { email, password, name, firstname, username } = req.body;
+    
+    // Vérifier si l'utilisateur existe
+    db.query('SELECT * FROM user WHERE id = ?', [userId], async (err, results) => {
+        if (err) return res.status(500).json({ msg: "Internal server error" });
+        if (results.length === 0) return res.status(404).json({ msg: "Not found" });
+        
+        // Construire les champs à mettre à jour
+        const updates = [];
+        const values = [];
+        
+        if (email) {
+            updates.push('email = ?');
+            values.push(email);
+        }
+        
+        if (password) {
+            try {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                updates.push('password = ?');
+                values.push(hashedPassword);
+            } catch (error) {
+                return res.status(500).json({ msg: "Internal server error" });
+            }
+        }
+        
+        if (name) {
+            updates.push('name = ?');
+            values.push(name);
+        }
+        
+        if (firstname) {
+            updates.push('firstname = ?');
+            values.push(firstname);
+        }
+        
+        if (username) {
+            updates.push('username = ?');
+            values.push(username);
+        }
+        
+        // Vérifier s'il y a des champs à mettre à jour
+        if (updates.length === 0) {
+            return res.status(400).json({ msg: "Bad parameter" });
+        }
+        
+        // Ajouter l'ID à la liste des valeurs
+        values.push(userId);
+        
+        // Exécuter la requête de mise à jour
+        db.query(`UPDATE user SET ${updates.join(', ')} WHERE id = ?`, values, (err, result) => {
+            if (err) return res.status(500).json({ msg: "Internal server error" });
+            
+            // Récupérer les informations mises à jour
+            db.query('SELECT id, email, name, firstname, username FROM user WHERE id = ?', [userId], (err, results) => {
+                if (err) return res.status(500).json({ msg: "Internal server error" });
+                res.json(results[0]);
+            });
+        });
+    });
+});
+
+// DELETE /users/:id - Supprimer un utilisateur
+router.delete('/:id', auth, (req, res) => {
+    const userId = req.params.id;
+    
+    // Vérifier si l'utilisateur existe
+    db.query('SELECT * FROM user WHERE id = ?', [userId], (err, results) => {
+        if (err) return res.status(500).json({ msg: "Internal server error" });
+        if (results.length === 0) return res.status(404).json({ msg: "Not found" });
+        
+        // Supprimer toutes les tâches de l'utilisateur d'abord
+        db.query('DELETE FROM todo WHERE user_id = ?', [userId], (err) => {
+            if (err) return res.status(500).json({ msg: "Internal server error" });
+            
+            // Puis supprimer l'utilisateur
+            db.query('DELETE FROM user WHERE id = ?', [userId], (err, result) => {
+                if (err) return res.status(500).json({ msg: "Internal server error" });
+                res.json({ msg: `Successfully deleted record number: ${userId}` });
+            });
+        });
     });
 });
 
