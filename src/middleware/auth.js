@@ -1,17 +1,25 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 module.exports = (req, res, next) => {
-   try {
-       const token = req.headers.authorization?.split(' ')[1];
-       
-       if (!token) {
-           return res.status(401).json({ msg: "No token, authorization denied" });
-       }
-       
-       const decodedToken = jwt.verify(token, process.env.SECRET);
-       req.auth = { userId: decodedToken.id };
-       next();
-   } catch(error) {
-       res.status(401).json({ msg: "Token is not valid" });
-   }
+    try {
+        // Récupérer le token du header Authorization
+        const token = req.headers['x-auth-token'] || req.headers.authorization?.split(' ')[1];
+        
+        // Vérifier si le token existe
+        if (!token) {
+            return res.status(401).json({ msg: "No token, authorization denied" });
+        }
+        
+        // Vérifier la validité du token
+        try {
+            const decoded = jwt.verify(token, process.env.SECRET);
+            req.auth = decoded; // Stocker les infos de l'utilisateur dans req.auth
+            next(); // Passer au middleware suivant
+        } catch (error) {
+            return res.status(401).json({ msg: "Token is not valid" });
+        }
+    } catch (error) {
+        return res.status(500).json({ msg: "Internal server error" });
+    }
 };
