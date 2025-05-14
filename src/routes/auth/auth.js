@@ -29,8 +29,8 @@ router.post('/register', async (req, res) => {
             // Chiffrer le mot de passe
             const hashedPassword = await bcrypt.hash(password, 10);
             // Insérer le nouvel utilisateur dans la base de données
-            db.query('INSERT INTO user (email, password, created_at, name, firstname, username) VALUES (?, ?, ?, ?, ?, ?)',
-                [email, hashedPassword, created_at, name, firstname, username],
+            db.query('INSERT INTO user (email, password, name, firstname, username) VALUES (?, ?, ?, ?, ?)',
+                [email, hashedPassword, name, firstname, username],
                 (err, result) => {
                     if (err) return res.status(500).json({ msg: "Internal server error" });
                     
