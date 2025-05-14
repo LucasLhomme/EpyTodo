@@ -1,20 +1,16 @@
 //app.js
 const express = require('express')
 const dotenv = require('dotenv');
-const bodyParser = require('body-parser');
 dotenv.config();
 const authRoutes = require('../routes/auth/auth.js');
 const todosRoutes = require('../routes/todos/todos.js');
-const db = require('../config/db.js');
 const app = express()
 const userRoutes = require('../routes/user/user.js');
 app.use(express.json());
-app.use(bodyParser.json());
 
-// Ces deux lignes sont suffisantes pour gérer toutes vos routes utilisateurs
+//road
 app.use('/user', userRoutes);
 app.use('/users', userRoutes);
-
 app.use('/', authRoutes);
 app.use('/todos', todosRoutes);
 

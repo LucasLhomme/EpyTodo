@@ -75,7 +75,7 @@ router.post('/', auth, (req, res) => {
             db.query('SELECT * FROM todo WHERE id = ?', [result.insertId], (err, results) => {
                 if (err)
                     return res.status(500).json({ msg: "Internal server error", details: err.message });
-                res.status(201).json(results[0]);
+                res.status(200).json(results[0]);
             });
         }
     );

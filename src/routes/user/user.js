@@ -5,8 +5,8 @@ const db = require('../../config/db');
 const auth = require('../../middleware/auth');
 
 // GET /user - Voir tous les utilisateurs
-router.get('/', auth, (req, res) => {
-    db.query('SELECT id, email, name, firstname, username FROM user', (err, results) => {
+router.get('/', auth, (_, res) => {
+    db.query('SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user', (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
         res.json(results);
     });
@@ -14,7 +14,18 @@ router.get('/', auth, (req, res) => {
 
 // GET /user/todos - Voir toutes les tâches d'un utilisateur connecté
 router.get('/todos', auth, (req, res) => {
-    db.query('SELECT * FROM todo WHERE user_id = ?', [req.auth.userId], (err, results) => {
+    db.query(`
+        SELECT 
+            id, 
+            title, 
+            description, 
+            DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, 
+            DATE_FORMAT(due_time, "%Y-%m-%d %H:%i:%s") AS due_time, 
+            status, 
+            user_id 
+        FROM todo 
+        WHERE user_id = ?
+    `, [req.auth.userId], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
         res.json(results);
     });
@@ -23,11 +34,11 @@ router.get('/todos', auth, (req, res) => {
 // GET /users/:id ou /users/:email - Voir les informations d'un utilisateur par ID ou email
 router.get('/:identifier', auth, (req, res) => {
     const identifier = req.params.identifier;
-    let query = 'SELECT id, email, password, created_at, firstname, name FROM user WHERE id = ?';
+    let query = 'SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user WHERE id = ?';
     
     // Vérifier si l'identifiant est un email
     if (identifier.includes('@')) {
-        query = 'SELECT id, email, password, created_at, firstname, name FROM user WHERE id = ?';
+        query = 'SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user WHERE email = ?';
     }
     
     db.query(query, [identifier], (err, results) => {
