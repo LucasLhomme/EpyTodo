@@ -28,8 +28,6 @@ router.post('/register', async (req, res) => {
             const username = email.split('@')[0];
             // Chiffrer le mot de passe
             const hashedPassword = await bcrypt.hash(password, 10);
-            // Créer le timestamp pour created_at
-            const created_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
             // Insérer le nouvel utilisateur dans la base de données
             db.query('INSERT INTO user (email, password, created_at, name, firstname, username) VALUES (?, ?, ?, ?, ?, ?)',
                 [email, hashedPassword, created_at, name, firstname, username],
