@@ -4,11 +4,27 @@ const bcrypt = require('bcryptjs');
 const db = require('../../config/db');
 const auth = require('../../middleware/auth');
 
-// GET /user - Voir tous les utilisateurs
-router.get('/', auth, (_, res) => {
-    db.query('SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user', (err, results) => {
+// Ajout de la fonction pour formater les dates
+const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+// GET /user - Voir les informations de l'utilisateur connecté
+router.get('/', auth, (req, res) => {
+    db.query('SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user WHERE id = ?', 
+    [req.auth.userId], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
-        res.json(results);
+        if (results.length === 0) return res.status(404).json({ msg: "Not found" });
+        
+        const user = results[0];
+        res.json(user);
     });
 });
 
@@ -32,19 +48,21 @@ router.get('/todos', auth, (req, res) => {
 });
 
 // GET /users/:id ou /users/:email - Voir les informations d'un utilisateur par ID ou email
-router.get('/:identifier', auth, (req, res) => {
-    const identifier = req.params.identifier;
-    let query = 'SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user WHERE id = ?';
+router.get('/:id', auth, (req, res) => {
+    const id = req.params.id;
+    let query = 'SELECT id, email, password, created_at, firstname, name FROM user WHERE id = ?';
     
     // Vérifier si l'identifiant est un email
-    if (identifier.includes('@')) {
-        query = 'SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user WHERE email = ?';
+    if (id.includes('@')) {
+        query = 'SELECT id, email, password, created_at, firstname, name FROM user WHERE email = ?';
     }
     
-    db.query(query, [identifier], (err, results) => {
+    db.query(query, [id], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
         if (results.length === 0) return res.status(404).json({ msg: "Not found" });
-        res.json(results[0]);
+        const user = results[0];
+        user.created_at = formatDate(user.created_at);
+        res.json(user);
     });
 });
 
@@ -74,7 +92,7 @@ router.put('/:id', auth, async (req, res) => {
         
         // Vérifier que le mot de passe n'est pas vide et a une longueur minimale
         if (password) {
-            if (password.trim() === '' || password.length < 6) {
+            if (password.trim() === ' ') {
             return res.status(400).json({ msg: "Bad parameter" });
             }
             try {
@@ -115,7 +133,6 @@ router.put('/:id', auth, async (req, res) => {
         if (updates.length === 0) {
             return res.status(400).json({ msg: "Bad parameter" });
         }
-        
         // Ajouter l'ID à la liste des valeurs
         values.push(userId);
         

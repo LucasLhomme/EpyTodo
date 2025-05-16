@@ -3,13 +3,29 @@ const router = express.Router();
 const db = require('../../config/db');
 const auth = require('../../middleware/auth');
 
-// Route GET pour récupérer toutes les tâches de l'utilisateur connecté
+// Fonction pour afficher la date
+const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+// Route GET pour récupérer toutes les tâches
 router.get('/', auth, (req, res) => {
-    db.query('SELECT * FROM todo WHERE user_id = ?', [req.auth.userId], (err, results) => {
+    db.query('SELECT * FROM todo', (err, results) => {
         if (err)
             return res.status(500).json({ msg: "Internal server error" });
         if (results.length === 0)
-            return res.json({ msg: "No todos found for this user", todos: [] });
+            return res.json({ msg: "No todos found", todos: [] });
+        results.forEach(todo => {
+            todo.created_at = formatDate(todo.created_at);
+            todo.due_time = formatDate(todo.due_time);
+        });
         res.json(results);
     });
 });
@@ -26,7 +42,10 @@ router.get('/:id', auth, (req, res) => {
                 return res.status(500).json({ msg: "Internal server error" });
             if (results.length === 0)
                 return res.status(404).json({ msg: "Not found" });
-            res.json(results[0]);
+            const todo = results[0];
+            todo.created_at = formatDate(todo.created_at);
+            todo.due_time = formatDate(todo.due_time);
+            res.json(todo);
         }
     );
 });
@@ -75,7 +94,7 @@ router.post('/', auth, (req, res) => {
             db.query('SELECT * FROM todo WHERE id = ?', [result.insertId], (err, results) => {
                 if (err)
                     return res.status(500).json({ msg: "Internal server error", details: err.message });
-                res.status(200).json(results[0]);
+                res.status(201).json(results[0]);
             });
         }
     );

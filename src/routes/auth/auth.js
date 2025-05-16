@@ -10,8 +10,9 @@ router.post('/register', async (req, res) => {
     const { email, password, firstname, name } = req.body;
     
     // Vérifier si tous les champs requis sont présents
-    if (!email || !password || !firstname || !name)
+    if (!email || !password || !firstname || !name) {
         return res.status(400).json({ msg: "Bad parameter" });
+    }
     // Vérifier que l'email est valide avec une regex simple
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email))
@@ -53,9 +54,8 @@ router.post('/register', async (req, res) => {
                             try {
                                 // Créer un token JWT pour le nouvel utilisateur
                                 const token = jwt.sign({ userId: result.insertId }, process.env.SECRET, { expiresIn: '24h' });
-                                
                                 // Renvoyer directement le token sans requête supplémentaire
-                                return res.status(200).json({ token });
+                                return res.status(201).json({ token });
                             } catch (jwtError) {
                                 return res.status(500).json({ msg: "Internal server error" });
                             }
@@ -79,7 +79,9 @@ router.post('/login', (req, res) => {
         return res.status(400).json({ msg: "Bad parameter" });
     // Rechercher l'utilisateur dans la base de données
     db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
-        if (err) return res.status(500).json({ msg: "Internal server error" });
+        if (err) {
+            return res.status(500).json({ msg: "Internal server error" });
+        }
         // Vérifier si l'utilisateur existe
         if (results.length === 0)
             return res.status(401).json({ msg: "Invalid credentials" });
