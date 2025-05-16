@@ -3,9 +3,10 @@ const router = express.Router();
 const db = require('../../config/db');
 const auth = require('../../middleware/auth');
 
-// Fonction pour afficher la date
+// Correction pour donner la bonne date
 const formatDate = (date) => {
     const d = new Date(date);
+    if (isNaN(d.getTime())) return null; // Vérifie si la date est valide
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -76,9 +77,9 @@ router.post('/', auth, (req, res) => {
     // Validation du format de date
     let parsedDueTime;
     try {
-        parsedDueTime = new Date(due_time).toISOString().slice(0, 19).replace('T', ' ');
-        if (parsedDueTime === 'Invalid Date')
-            throw new Error('Invalid date format');
+        const formattedDate = formatDate(due_time);
+        if (!formattedDate) throw new Error('Invalid date format');
+        parsedDueTime = formattedDate;
     } catch (error) {
         return res.status(400).json({ 
             msg: "Invalid date format", 
@@ -94,7 +95,10 @@ router.post('/', auth, (req, res) => {
             db.query('SELECT * FROM todo WHERE id = ?', [result.insertId], (err, results) => {
                 if (err)
                     return res.status(500).json({ msg: "Internal server error", details: err.message });
-                res.status(201).json(results[0]);
+                const todo = results[0];
+                todo.created_at = formatDate(todo.created_at);
+                todo.due_time = formatDate(todo.due_time);
+                res.status(201).json(todo);
             });
         }
     );
