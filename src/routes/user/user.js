@@ -18,12 +18,13 @@ const formatDate = (date) => {
 
 // GET /user - Voir les informations de l'utilisateur connecté
 router.get('/', auth, (req, res) => {
-    db.query('SELECT id, email, password, DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, firstname, name FROM user WHERE id = ?', 
+    db.query('SELECT id, email, password, created_at, firstname, name FROM user WHERE id = ?', 
     [req.auth.userId], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
         if (results.length === 0) return res.status(404).json({ msg: "Not found" });
         
         const user = results[0];
+        user.created_at = formatDate(user.created_at);
         res.json(user);
     });
 });
@@ -35,14 +36,18 @@ router.get('/todos', auth, (req, res) => {
             id, 
             title, 
             description, 
-            DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS created_at, 
-            DATE_FORMAT(due_time, "%Y-%m-%d %H:%i:%s") AS due_time, 
+            created_at, 
+            due_time, 
             status, 
             user_id 
         FROM todo 
         WHERE user_id = ?
     `, [req.auth.userId], (err, results) => {
         if (err) return res.status(500).json({ msg: "Internal server error" });
+        results.forEach(todo => {
+            todo.created_at = formatDate(todo.created_at);
+            todo.due_time = formatDate(todo.due_time);
+        });
         res.json(results);
     });
 });
@@ -141,9 +146,11 @@ router.put('/:id', auth, async (req, res) => {
             if (err) return res.status(500).json({ msg: "Internal server error" });
             
             // Récupérer les informations mises à jour
-            db.query('SELECT id, email, name, firstname, username FROM user WHERE id = ?', [userId], (err, results) => {
+            db.query('SELECT id, email, password, created_at, name, firstname, username FROM user WHERE id = ?', [userId], (err, results) => {
                 if (err) return res.status(500).json({ msg: "Internal server error" });
-                res.json(results[0]);
+                const user = results[0];
+                user.created_at = formatDate(user.created_at);
+                res.json(user);
             });
         });
     });

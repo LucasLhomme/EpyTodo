@@ -113,30 +113,26 @@ router.put('/:id', auth, (req, res) => {
     const { title, description, due_time, status } = req.body;
     // Vérification de la présence d'au moins un champ à mettre à jour
     if (!title && !description && !due_time && !status) {
-        return res.status(400).json({ msg: "Nothing to update - At least one field must be provided" });
+        return res.status(400);
     }
     // Validation du statut si fourni
     if (status) {
         const validStatuses = ['not started', 'todo', 'in progress', 'done'];
         if (!validStatuses.includes(status)) {
-            return res.status(400).json({ 
-                msg: "Bad parameter", 
-                details: `Invalid status '${status}', must be one of: ${validStatuses.join(', ')}` 
-            });
+            return res.status(400).json({msg: "Bad parameter"});
         }
     }
     // Validation du format de date si fournie
     let parsedDueTime;
     if (due_time) {
         try {
-            parsedDueTime = new Date(due_time).toISOString().slice(0, 19).replace('T', ' ');
-            if (parsedDueTime === 'Invalid Date') {
+            parsedDueTime = formatDate(due_time);
+            if (!parsedDueTime) {
                 throw new Error('Invalid date format');
             }
         } catch (error) {
             return res.status(400).json({ 
                 msg: "Invalid date format", 
-                details: "due_time must be in a valid date format (YYYY-MM-DD HH:MM:SS)" 
             });
         }
     }
@@ -184,7 +180,10 @@ router.put('/:id', auth, (req, res) => {
                         if (err) {
                             return res.status(500).json({ msg: "Internal server error", details: err.message });
                         }
-                        res.json(results[0]);
+                        const todo = results[0];
+                        todo.created_at = formatDate(todo.created_at);
+                        todo.due_time = formatDate(todo.due_time);
+                        res.json(todo);
                     });
                 }
             );
