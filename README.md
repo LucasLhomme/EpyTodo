@@ -19,3 +19,8 @@ npm install mysql2
 npm install jsonwebtoken
 npm install bcryptjs
 ```
+
+## Contributors
+
+- [Jawed Lahrouri](https://github.com/jawedlahrouri)
+- [Lucas Lhomme](https://github.com/LucasLhomme)
