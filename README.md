@@ -19,7 +19,7 @@ npm install mysql2
 npm install jsonwebtoken
 npm install bcryptjs
 ```
-
+(the .env was necesseary for the subject)
 ## Contributors
 
 - [Jawed Lahrouri](https://github.com/jawedlahrouri)
